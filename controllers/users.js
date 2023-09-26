@@ -1,8 +1,13 @@
 /* eslint-disable no-console */
 const User = require('../models/user');
 
-const castError = new Error('Данные введены неправильно');
+const castError = new Error('Пользователь не найден');
 castError.name = 'CastError';
+castError.status = 404;
+
+const validationError = new Error('Данные введены неправильно');
+validationError.name = 'ValidationError';
+validationError.status = 400;
 
 const errorHandle = (err, res) => {
   if (err.name === 'CastError') {
@@ -29,6 +34,7 @@ module.exports.getUsersById = (req, res) => {
       .then((user) => res.send(user))
       .catch((err) => errorHandle(err, res));
   }
+  throw validationError;
 };
 
 module.exports.createUser = (req, res) => {
@@ -39,13 +45,23 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  const { name, about } = req.params;
-  if (name.lenght < 2 || about.lenght < 2 || name.lenght > 30 || about.lenght > 30) {
-    throw castError;
+  const { name, about } = req.body;
+  if (about === undefined && name > 2 && name < 30) {
+    User.findByIdAndUpdate(req.params.id, { name: req.body.name })
+      .then((user) => res.send(user))
+      .catch((err) => errorHandle(err, res));
   }
-  User.findByIdAndUpdate(req.params.id, { name, about })
-    .then((user) => res.send(user))
-    .catch((err) => errorHandle(err, res));
+  if (name === undefined && about > 2 && about < 30) {
+    User.findByIdAndUpdate(req.params.id, { about: req.body.about })
+      .then((user) => res.send(user))
+      .catch((err) => errorHandle(err, res));
+  }
+  if (about > 2 && about < 30 && name > 2 && name < 30) {
+    User.findByIdAndUpdate(req.params.id, { name: req.body.name, about: req.body.about })
+      .then((user) => res.send(user))
+      .catch((err) => errorHandle(err, res));
+  }
+  throw validationError;
 };
 
 module.exports.updateAvatar = (req, res) => {
