@@ -1,6 +1,9 @@
 /* eslint-disable no-console */
 const User = require('../models/user');
 
+const castError = new Error('Данные введены неправильно');
+castError.name = 'CastError';
+
 const errorHandle = (err, res) => {
   if (err.name === 'CastError') {
     res.status(404).send({ message: 'Пользователь не найден' });
@@ -21,9 +24,11 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUsersById = (req, res) => {
-  User.findById(req.params.userId)
-    .then((user) => res.send(user))
-    .catch((err) => errorHandle(err, res));
+  if (typeof req.params.userId === 'string') {
+    User.findById(req.params.userId)
+      .then((user) => res.send(user))
+      .catch((err) => errorHandle(err, res));
+  }
 };
 
 module.exports.createUser = (req, res) => {
@@ -34,7 +39,11 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.updateProfile = (req, res) => {
-  User.findByIdAndUpdate(req.params.id, { name: req.params.name, about: req.params.about })
+  const { name, about } = req.params;
+  if (name.lenght < 2 || about.lenght < 2 || name.lenght > 30 || about.lenght > 30) {
+    throw castError;
+  }
+  User.findByIdAndUpdate(req.params.id, { name, about })
     .then((user) => res.send(user))
     .catch((err) => errorHandle(err, res));
 };
