@@ -4,9 +4,11 @@ const User = require('../models/user');
 const errorHandle = (err, res) => {
   if (err.name === 'CastError') {
     res.status(404).send({ message: 'Пользователь не найден' });
+    return;
   }
   if (err.name === 'ValidationError') {
     res.status(400).send({ message: 'Данные введены неправильно' });
+    return;
   }
   res.status(500).send({ message: 'Произошла ошибка' });
 };
