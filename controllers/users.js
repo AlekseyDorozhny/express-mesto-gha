@@ -33,6 +33,7 @@ module.exports.getUsersById = (req, res) => {
     User.findById(req.params.userId)
       .then((user) => res.send(user))
       .catch((err) => errorHandle(err, res));
+    return;
   }
   throw validationError;
 };
@@ -50,16 +51,19 @@ module.exports.updateProfile = (req, res) => {
     User.findByIdAndUpdate(req.params.id, { name: req.body.name })
       .then((user) => res.send(user))
       .catch((err) => errorHandle(err, res));
+    return;
   }
   if (name === undefined && about > 2 && about < 30) {
     User.findByIdAndUpdate(req.params.id, { about: req.body.about })
       .then((user) => res.send(user))
       .catch((err) => errorHandle(err, res));
+    return;
   }
   if (about > 2 && about < 30 && name > 2 && name < 30) {
     User.findByIdAndUpdate(req.params.id, { name: req.body.name, about: req.body.about })
       .then((user) => res.send(user))
       .catch((err) => errorHandle(err, res));
+    return;
   }
   throw validationError;
 };
