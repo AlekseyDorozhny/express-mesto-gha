@@ -2,14 +2,6 @@
 const { ObjectId } = require('mongoose').Types;
 const User = require('../models/user');
 
-const castError = new Error('Пользователь не найден');
-castError.name = 'CastError';
-castError.status = 404;
-
-const validationError = new Error('Данные введены неправильно');
-validationError.name = 'ValidationError';
-validationError.status = 400;
-
 const errorHandle = (err, res) => {
   console.log(err.name);
   if (err.name === 'CastError') {
@@ -35,14 +27,14 @@ module.exports.getUsersById = (req, res) => {
     User.findById(req.params.userId)
       .then((user) => {
         if (user === null) {
-          throw castError;
+          res.status(404).send({ message: 'Пользователь не найден' });
         }
         res.send(user);
       })
       .catch((err) => errorHandle(err, res));
     return;
   }
-  throw validationError;
+  res.status(400).send({ message: 'Данные введены неправильно' });
 };
 
 module.exports.createUser = (req, res) => {
@@ -72,7 +64,7 @@ module.exports.updateProfile = (req, res) => {
       .catch((err) => errorHandle(err, res));
     return;
   }
-  throw validationError;
+  res.status(400).send({ message: 'Данные введены неправильно' })
 };
 
 module.exports.updateAvatar = (req, res) => {
