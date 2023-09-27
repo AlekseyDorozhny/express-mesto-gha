@@ -29,6 +29,7 @@ module.exports.getUsersById = (req, res) => {
       .then((user) => {
         if (user === null) {
           res.status(404).send({ message: 'Пользователь не найден' });
+          return;
         }
         res.send(user);
       })
