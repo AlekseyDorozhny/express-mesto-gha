@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 /* eslint-disable no-console */
 const { ObjectId } = require('mongoose').Types;
 const User = require('../models/user');
@@ -46,29 +47,21 @@ module.exports.createUser = (req, res) => {
 
 module.exports.updateProfile = (req, res) => {
   const { name, about } = req.body;
-  if (about === undefined && name > 2 && name < 30) {
-    User.findByIdAndUpdate(req.params.id, { name: req.body.name })
-      .then((user) => res.send(user))
-      .catch((err) => errorHandle(err, res));
-    return;
-  }
-  if (name === undefined && about > 2 && about < 30) {
-    User.findByIdAndUpdate(req.params.id, { about: req.body.about })
-      .then((user) => res.send(user))
-      .catch((err) => errorHandle(err, res));
-    return;
-  }
-  if (about > 2 && about < 30 && name > 2 && name < 30) {
-    User.findByIdAndUpdate(req.params.id, { name: req.body.name, about: req.body.about })
-      .then((user) => res.send(user))
-      .catch((err) => errorHandle(err, res));
-    return;
-  }
-  res.status(400).send({ message: 'Данные введены неправильно' })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true, upsert: true },
+  )
+    .then((user) => res.send(user))
+    .catch((err) => errorHandle(err, res));
 };
 
 module.exports.updateAvatar = (req, res) => {
-  User.findByIdAndUpdate(req.params.id, { avatar: req.params.avatar })
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar: req.body.avatar },
+    { new: true, runValidators: true, upsert: true },
+  )
     .then((user) => res.send(user))
     .catch((err) => errorHandle(err, res));
 };

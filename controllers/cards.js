@@ -1,5 +1,4 @@
 /* eslint-disable no-console */
-/* eslint-disable no-unused-vars */
 /* eslint-disable no-underscore-dangle */
 const Card = require('../models/card');
 
