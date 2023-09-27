@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+const { ObjectId } = require('mongoose').Types;
 const User = require('../models/user');
 
 const castError = new Error('Пользователь не найден');
@@ -10,6 +11,7 @@ validationError.name = 'ValidationError';
 validationError.status = 400;
 
 const errorHandle = (err, res) => {
+  console.log(err.name);
   if (err.name === 'CastError') {
     res.status(404).send({ message: 'Пользователь не найден' });
     return;
@@ -29,9 +31,14 @@ module.exports.getUsers = (req, res) => {
 };
 
 module.exports.getUsersById = (req, res) => {
-  if (typeof req.params.userId === 'string') {
+  if (ObjectId.isValid(req.params.userId)) {
     User.findById(req.params.userId)
-      .then((user) => res.send(user))
+      .then((user) => {
+        if (user === null) {
+          throw castError;
+        }
+        res.send(user);
+      })
       .catch((err) => errorHandle(err, res));
     return;
   }
