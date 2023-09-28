@@ -27,13 +27,7 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUsersById = (req, res) => {
   User.findById(req.params.userId).orFail()
-    .then((user) => {
-      if (user === null) {
-        res.status(404).send({ message: 'Пользователь не найден' });
-        return;
-      }
-      res.send(user);
-    })
+    .then((user) => res.send(user))
     .catch((err) => errorHandle(err, res));
 };
 
