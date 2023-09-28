@@ -1,21 +1,21 @@
 /* eslint-disable no-console */
 const Card = require('../models/card');
 
+const defaultError = 500;
+const notFoundError = 404;
+const badRequestError = 400;
+
 const errorHandle = (err, res) => {
   console.log(err.name);
   if (err.name === 'DocumentNotFoundError') {
-    res.status(404).send({ message: 'Карточка не найдена' });
+    res.status(notFoundError).send({ message: 'Пользователь не найден' });
     return;
   }
-  if (err.name === 'CastError') {
-    res.status(400).send({ message: 'Неправильный id' });
+  if (err.name === 'ValidationError' || err.name === 'CastError') {
+    res.status(badRequestError).send({ message: 'Данные введены неправильно' });
     return;
   }
-  if (err.name === 'ValidationError') {
-    res.status(400).send({ message: 'Данные введены неправильно' });
-    return;
-  }
-  res.status(500).send({ message: 'Произошла ошибка' });
+  res.status(defaultError).send({ message: 'Произошла ошибка' });
 };
 
 module.exports.getCards = (req, res) => {
