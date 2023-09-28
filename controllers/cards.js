@@ -1,12 +1,14 @@
 /* eslint-disable no-console */
-/* eslint-disable no-underscore-dangle */
-const { ObjectId } = require('mongoose').Types;
 const Card = require('../models/card');
 
 const errorHandle = (err, res) => {
   console.log(err.name);
+  if (err.name === 'DocumentNotFoundError') {
+    res.status(404).send({ message: 'Карточка не найдена' });
+    return;
+  }
   if (err.name === 'CastError') {
-    res.status(404).send({ message: 'Неправильный id' });
+    res.status(400).send({ message: 'Неправильный id' });
     return;
   }
   if (err.name === 'ValidationError') {
@@ -23,19 +25,15 @@ module.exports.getCards = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
-  if (ObjectId.isValid(req.params.cardId)) {
-    Card.findByIdAndRemove(req.params.cardId)
-      .then((card) => {
-        if (card === null) {
-          res.status(404).send({ message: 'Карточка не найдена' });
-          return;
-        }
-        res.send(card);
-      })
-      .catch((err) => errorHandle(err, res));
-    return;
-  }
-  res.status(400).send({ message: 'Данные введены неправильно' });
+  Card.findByIdAndRemove(req.params.cardId).orFail()
+    .then((card) => {
+      if (card === null) {
+        res.status(404).send({ message: 'Карточка не найдена' });
+        return;
+      }
+      res.send(card);
+    })
+    .catch((err) => errorHandle(err, res));
 };
 
 module.exports.createCard = (req, res) => {
@@ -50,45 +48,37 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.likeCard = ((req, res) => {
-  if (ObjectId.isValid(req.params.cardId)) {
-    Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $addToSet: { likes: req.user._id } },
-      { new: true },
-    )
-      .then((card) => {
-        if (card === null) {
-          res.status(404).send({ message: 'Карточка не найдена' });
-          return;
-        }
-        res.send(card);
-      })
-      .catch((err) => errorHandle(err, res));
-    return;
-  }
-  res.status(400).send({ message: 'Данные введены неправильно' });
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
+  ).orFail()
+    .then((card) => {
+      if (card === null) {
+        res.status(404).send({ message: 'Карточка не найдена' });
+        return;
+      }
+      res.send(card);
+    })
+    .catch((err) => errorHandle(err, res));
 }
 
 );
 
 module.exports.dislikeCard = ((req, res) => {
   console.log(req.params.cardId);
-  if (ObjectId.isValid(req.params.cardId)) {
-    Card.findByIdAndUpdate(
-      req.params.cardId,
-      { $pull: { likes: req.user._id } },
-      { new: true },
-    )
-      .then((card) => {
-        if (card === null) {
-          res.status(404).send({ message: 'Карточка не найдена' });
-          return;
-        }
-        res.send(card);
-      })
-      .catch((err) => errorHandle(err, res));
-    return;
-  }
-  res.status(400).send({ message: 'Данные введены неправильно' });
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true },
+  ).orFail()
+    .then((card) => {
+      if (card === null) {
+        res.status(404).send({ message: 'Карточка не найдена' });
+        return;
+      }
+      res.send(card);
+    })
+    .catch((err) => errorHandle(err, res));
 }
 );
