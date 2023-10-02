@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
+require('dotenv').config();
 
 const { PORT = 3000 } = process.env;
 
@@ -12,16 +14,10 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb', {
 
 const app = express();
 app.use(express.json());
+app.use(cookieParser());
 
 app.listen(PORT, () => {
   console.log('Сервер запустился');
-});
-
-app.use((req, res, next) => {
-  req.user = {
-    _id: '650ec4bd63095d359ddba6fa',
-  };
-  next();
 });
 
 app.use('/', require('./routes/index'));
