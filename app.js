@@ -3,6 +3,7 @@ const express = require('express');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 require('dotenv').config();
+const { errors } = require('celebrate');
 
 const errorHandler = require('./middlewares/errores');
 
@@ -24,4 +25,5 @@ app.listen(PORT, () => {
 
 app.use('/', require('./routes/index'));
 
-app.use('/', errorHandler);
+app.use(errors());
+app.use(errorHandler);
