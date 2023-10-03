@@ -1,37 +1,16 @@
 /* eslint-disable no-console */
 const Card = require('../models/card');
 
-const defaultError = 500;
-const notFoundError = 404;
-const badRequestError = 400;
-
 const notEnoughRightsError = new Error('Нельзя удалять карточку другого пользователя');
 notEnoughRightsError.code = 403;
 
-const errorHandler = (err, res) => {
-  console.log(err);
-  if (err.name === 'DocumentNotFoundError') {
-    res.status(notFoundError).send({ message: 'Пользователь не найден' });
-    return;
-  }
-  if (err.name === 'ValidationError' || err.name === 'CastError') {
-    res.status(badRequestError).send({ message: 'Данные введены неправильно' });
-    return;
-  }
-  if (err.code === 403) {
-    res.status(notEnoughRightsError.code).send({ message: err.message });
-    return;
-  }
-  res.status(defaultError).send({ message: 'Произошла ошибка' });
-};
-
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => next(err));
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId).orFail()
     // eslint-disable-next-line consistent-return
     .then((card) => {
@@ -43,10 +22,10 @@ module.exports.deleteCard = (req, res) => {
       Card.findByIdAndRemove(req.params.cardId).orFail()
         .then((card) => res.send(card));
     })
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => next(err));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const {
     name, link, owner = req.user._id, likes, createdAt,
   } = req.body;
@@ -54,22 +33,21 @@ module.exports.createCard = (req, res) => {
     name, link, owner, likes, createdAt,
   })
     .then((card) => res.send(card))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => next(err));
 };
 
-module.exports.likeCard = ((req, res) => {
+module.exports.likeCard = ((req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
     { new: true },
   ).orFail()
     .then((card) => res.send(card))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => next(err));
 }
-
 );
 
-module.exports.dislikeCard = ((req, res) => {
+module.exports.dislikeCard = ((req, res, next) => {
   console.log(req.params.cardId);
   Card.findByIdAndUpdate(
     req.params.cardId,
@@ -77,6 +55,6 @@ module.exports.dislikeCard = ((req, res) => {
     { new: true },
   ).orFail()
     .then((card) => res.send(card))
-    .catch((err) => errorHandler(err, res));
+    .catch((err) => next(err));
 }
 );
