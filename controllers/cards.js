@@ -1,3 +1,4 @@
+/* eslint-disable arrow-body-style */
 /* eslint-disable no-console */
 const Card = require('../models/card');
 
@@ -19,18 +20,16 @@ module.exports.deleteCard = (req, res, next) => {
       }
     })
     .then(() => {
-      Card.findByIdAndRemove(req.params.cardId).orFail()
+      return Card.findByIdAndRemove(req.params.cardId).orFail()
         .then((card) => res.send(card));
     })
     .catch((err) => next(err));
 };
 
 module.exports.createCard = (req, res, next) => {
-  const {
-    name, link, owner = req.user._id, likes, createdAt,
-  } = req.body;
+  const { name, link } = req.body;
   Card.create({
-    name, link, owner, likes, createdAt,
+    name, link, owner: req.user._id,
   })
     .then((card) => res.send(card))
     .catch((err) => next(err));
