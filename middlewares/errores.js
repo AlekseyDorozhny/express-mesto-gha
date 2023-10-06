@@ -8,13 +8,13 @@ const DefaultError = require('../errors/defaultError'); // 500
 
 // eslint-disable-next-line no-unused-vars
 module.exports = (err, req, res, next) => {
-  // console.log(err);
+  console.log(err.code);
   if (err.name === 'ValidationError' || err.name === 'CastError') {
-    res.status(BadRequestError.code).send({ message: 'Данные введены неправильно' });
+    res.status(400).send({ message: 'Данные введены неправильно' });
     return;
   }
   if (err.code === 401) {
-    res.status(WrongAuth.code).send({ message: err.message });
+    res.status(401).send({ message: err.message });
     return;
   }
   if (err.code === 403) {
