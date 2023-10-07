@@ -1,10 +1,10 @@
+/* eslint-disable no-unused-vars */
 const { celebrate, Joi } = require('celebrate');
 
 const router = require('express').Router();
 const { login, createUser } = require('../controllers/users');
 const auth = require('../middlewares/auth');
-
-const notFoundError = 404;
+const NotFoundError = require('../errors/NotFoundError');
 
 router.use('/users', auth, require('./users'));
 router.use('/cards', auth, require('./cards'));
@@ -34,7 +34,7 @@ router.post(
 );
 
 router.use('*', auth, (req, res) => {
-  res.status(notFoundError).send({ message: 'Страницы не существует' });
+  throw new NotFoundError('Страницы не существует');
 });
 
 module.exports = router;

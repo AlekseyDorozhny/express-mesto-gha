@@ -2,6 +2,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
+const ConflictingRequestError = require('../errors/ConflictingRequestError');
+
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const User = require('../models/user');
@@ -61,7 +63,13 @@ module.exports.createUser = (req, res, next) => {
       avatar: user.avatar,
       email: user.email,
     }))
-    .catch((err) => next(err));
+    .catch((err) => {
+      if (err.code === 11000) {
+        next(new ConflictingRequestError('Данный Email уже зарегестрирован'));
+        return;
+      }
+      next(err);
+    });
 };
 
 module.exports.updateProfile = (req, res, next) => {
