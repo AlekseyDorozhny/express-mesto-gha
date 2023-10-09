@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 require('dotenv').config();
 const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const errorHandler = require('./middlewares/errores');
 
@@ -23,7 +24,10 @@ app.listen(PORT, () => {
   console.log('Сервер запустился');
 });
 
+app.use(requestLogger);
+
 app.use('/', require('./routes/index'));
 
+app.use(errorLogger);
 app.use(errors());
 app.use(errorHandler);
